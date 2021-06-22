@@ -6,6 +6,10 @@ import random
 import sys
 
 from pygame.locals import *
+from cave import Cave
+from agent import Agent
+from room import Room
+
 
 directions = [[-1,0], [1,0], [0,1], [0,-1]]
 
@@ -55,6 +59,8 @@ DOWN = 'down'
 LEFT = 'left'
 RIGHT = 'right'
 
+CAVE = None
+
 HEAD = 0  # syntactic sugar: index of the worm's head
 
 
@@ -70,6 +76,8 @@ def main():
     showStartScreen()
     while True:
         runGame()
+        CAVE = Cave()
+        CAVE.setup()
         showGameOverScreen()
 
 
@@ -152,12 +160,27 @@ def runGame():
         
         DISPLAYSURF.fill(BGCOLOR)
         drawGrid()
-        drawWumpus(wumpusCoords)
-        drawAgent(agentCoords, direction)
-        drawPit(pitCoords)
-        drawGold(goldCoords)
-        drawStench(stenchCoords)
-        drawBreeze(breezeCoords)
+
+        wumpus_coords = CAVE.get_all_wumpus_coords()
+        treasure_coords = CAVE.get_all_treasure_coords()
+        pit_coords = CAVE.get_all_pit_coords()
+        stench_coords = CAVE.get_all_stench_coords()
+        breeze_coords = CAVE.get_all_breeze_coords()
+        agent_coords = CAVE.get_all_agent_coords()
+
+        drawWumpus(wumpus_coords)
+        drawAgent(agent_coords)
+        drawPit(pit_coords)
+        drawGold(treasure_coords)
+        drawStench(stench_coords)
+        drawBreeze(breeze_coords)
+            
+        #drawWumpus(wumpusCoords)
+        #drawAgent(agentCoords, direction)
+        #drawPit(pitCoords)
+        #drawGold(goldCoords)
+        #drawStench(stenchCoords)
+        #drawBreeze(breezeCoords)
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 
@@ -311,6 +334,7 @@ def drawAgent(agentCoords, direction):
             gameDisplay.blit(agentImage, (x,y))
 
 def drawGrid():
+
     for x in range(0, WINDOWWIDTH, CELLSIZE):  # draw vertical lines
         pygame.draw.line(DISPLAYSURF, DARKGRAY, (x, 0), (x, WINDOWHEIGHT))
     for y in range(0, WINDOWHEIGHT, CELLSIZE):  # draw horizontal lines
