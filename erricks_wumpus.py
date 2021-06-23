@@ -136,26 +136,44 @@ def runGame():
         elif event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 terminate()
-            elif event.key == K_DOWN:
-                agentCoord1 = {'x': agentCoord1['x'], 'y': min(agentCoord1['y'] + 1, 19)}
-            elif event.key == K_UP:
-                agentCoord1 = {'x': agentCoord1['x'], 'y': max(agentCoord1['y'] - 1, 0)}
+            if event.key == K_UP:
+                if direction1 == DOWN:
+                    agentCoord1 = {'x': agentCoord1['x'], 'y': min(agentCoord1['y'] + 1, 19)}
+                elif direction1 == UP:
+                    agentCoord1 = {'x': agentCoord1['x'], 'y': max(agentCoord1['y'] - 1, 0)}
+                elif direction1 == LEFT:
+                    agentCoord1 = {'x': max(agentCoord1['x'] - 1, 0), 'y': agentCoord1['y']}
+                elif direction1 == RIGHT:
+                    agentCoord1 = {'x': min(agentCoord1['x'] + 1, 19), 'y': agentCoord1['y']}
             elif event.key == K_LEFT:
-                agentCoord1 = {'x': max(agentCoord1['x'] - 1, 0), 'y': agentCoord1['y']}
+                if direction1 == UP:
+                    direction1 = LEFT
+                elif direction1 == LEFT:
+                    direction1 = DOWN
+                elif direction1 == DOWN:
+                    direction1 = RIGHT
+                else:
+                    direction1 = UP
             elif event.key == K_RIGHT:
-                agentCoord1 = {'x': min(agentCoord1['x'] + 1, 19), 'y': agentCoord1['y']}
+                if direction1 == UP:
+                    direction1 = RIGHT
+                elif direction1 == RIGHT:
+                    direction1 = DOWN
+                elif direction1 == DOWN:
+                    direction1 = LEFT
+                else:
+                    direction1 = UP
             elif event.key == K_RETURN:
                 pass
             else:
                 print(event.key)
                 return
-
             DISPLAYSURF.fill(WHITE)
             drawGrid()
             mainGrid.draw()
-            drawAgent(agentCoord1)
-            drawAgent(agentCoord2)
-            drawAgent(agentCoord3)
+            drawAgent(agentCoord1, direction1)
+            drawAgent(agentCoord2, direction2)
+            drawAgent(agentCoord3, direction3)
             # agentCoord = moveAgent(agentCoord, [])
             pygame.display.update()
             FPSCLOCK.tick(FPS)
@@ -304,12 +322,32 @@ def drawScore(score):
     scoreRect.topleft = (WINDOWWIDTH - 120, 10)
     DISPLAYSURF.blit(scoreSurf, scoreRect)
 
-def drawAgent(agentCoord):
+def drawAgent(agentCoord, direction):
     x = agentCoord['x'] * CELLSIZE
     y = agentCoord['y'] * CELLSIZE
     xcenter = agentCoord['x'] * CELLSIZE + math.floor(CELLSIZE / 2)
     ycenter = agentCoord['y'] * CELLSIZE+ math.floor(CELLSIZE / 2)
     pygame.draw.circle(DISPLAYSURF, LAKER_BLACK, (xcenter, ycenter), RADIUS / 2)
+    if direction == RIGHT:
+        directionSurf = BASICFONT.render('R', True, LAKER_BLACK)
+        directionRect = directionSurf.get_rect()
+        directionRect.topleft = (x + 35, y + 35)
+        DISPLAYSURF.blit(directionSurf, directionRect)
+    elif direction == LEFT:
+        directionSurf = BASICFONT.render('L', True, LAKER_BLACK)
+        directionRect = directionSurf.get_rect()
+        directionRect.topleft = (x + 35, y + 35)
+        DISPLAYSURF.blit(directionSurf, directionRect)
+    elif direction == UP:
+        directionSurf = BASICFONT.render('U', True, LAKER_BLACK)
+        directionRect = directionSurf.get_rect()
+        directionRect.topleft = (x + 35, y + 35)
+        DISPLAYSURF.blit(directionSurf, directionRect)
+    elif direction == DOWN:
+        directionSurf = BASICFONT.render('D', True, LAKER_BLACK)
+        directionRect = directionSurf.get_rect()
+        directionRect.topleft = (x + 35, y + 35)
+        DISPLAYSURF.blit(directionSurf, directionRect)
 
 def drawWumpus(wumpusCoord):
     x = wumpusCoord['x'] * CELLSIZE
