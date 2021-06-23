@@ -7,9 +7,9 @@ import random, pygame, sys,math
 from pygame.locals import *
 
 FPS = 5
-WINDOWWIDTH = 500
-WINDOWHEIGHT = 500
-CELLSIZE = 100
+WINDOWWIDTH = 1000
+WINDOWHEIGHT = 1000
+CELLSIZE = 50
 RADIUS = math.floor(CELLSIZE / 2.5)
 assert WINDOWWIDTH % CELLSIZE == 0, "Window width must be a multiple of cell size."
 assert WINDOWHEIGHT % CELLSIZE == 0, "Window height must be a multiple of cell size."
@@ -53,8 +53,8 @@ def main():
 
 
 def runGame():
-    mainGrid = Grid(5, 5)
-    mapElements = getRandomLocations(5)
+    mainGrid = Grid(20, 20)
+    mapElements = getRandomLocations(13)
 
     coords = mapElements[0]
     mainGrid.tiles[coords[0]][coords[1]].hasWumpus = True
@@ -75,67 +75,60 @@ def runGame():
     coords = mapElements[4]
     mainGrid.tiles[coords[0]][coords[1]].hasGold = True
 
+    coords = mapElements[5]
+    mainGrid.tiles[coords[0]][coords[1]].hasWumpus = True
+    addStenches(coords, mainGrid)
+
+    coords = mapElements[6]
+    mainGrid.tiles[coords[0]][coords[1]].hasPit = True
+    addBreezes(coords, mainGrid)
+
+    coords = mapElements[7]
+    mainGrid.tiles[coords[0]][coords[1]].hasPit = True
+    addBreezes(coords, mainGrid)
+
+    coords = mapElements[8]
+    mainGrid.tiles[coords[0]][coords[1]].hasPit = True
+    addBreezes(coords, mainGrid)
+
+    coords = mapElements[9]
+    mainGrid.tiles[coords[0]][coords[1]].hasWumpus = True
+    addStenches(coords, mainGrid)
+
+    coords = mapElements[10]
+    mainGrid.tiles[coords[0]][coords[1]].hasPit = True
+    addBreezes(coords, mainGrid)
+
+    coords = mapElements[11]
+    mainGrid.tiles[coords[0]][coords[1]].hasPit = True
+    addBreezes(coords, mainGrid)
+
+    coords = mapElements[12]
+    mainGrid.tiles[coords[0]][coords[1]].hasPit = True
+    addBreezes(coords, mainGrid)
+
     # Set start point for agent
-    startx = 0
-    starty = 4
-    agentCoord = {'x': startx, 'y': starty}
-    direction = RIGHT
+    startx1 = 0
+    starty1 = 19
+    startx2 = 0
+    starty2 = 0
+    startx3 = 19
+    starty3 = 0
+    agentCoord1 = {'x': startx1, 'y': starty1}
+    agentCoord2 = {'x': startx2, 'y': starty2}
+    agentCoord3 = {'x': startx3, 'y': starty3}
+    direction1 = UP
+    direction2 = RIGHT
+    direction3 = DOWN
 
-    # Start the wumpus, pits, and gold in a random place.
-    # wumpusCoord = getRandomLocation()
-    # goldCoord = getRandomLocation()
-    
-    # pitCoords = []
-    # breezeCoords = []
-    # stenchCoords = []
-    
-    # pitCoords.append(getRandomLocation())
-    # pitCoords.append(getRandomLocation())
-    # pitCoords.append(getRandomLocation())
-    
-    # while (goldCoord['x'] == wumpusCoord['x']) and (goldCoord['y'] == wumpusCoord['y']):
-    #     goldCoord = getRandomLocation()
-
-    # while (pitCoords[0]['x'] == goldCoord['x']) and (pitCoords[0]['y'] == goldCoord['y'])\
-    #     or (pitCoords[0]['x'] == wumpusCoord['x']) and (pitCoords[0]['y'] == wumpusCoord['y']):
-    #     pitCoords[0] = getRandomLocation()
-
-    # while (pitCoords[1]['x'] == pitCoords[0]['x']) and (pitCoords[1]['y'] == pitCoords[0]['y'])\
-    #     or (pitCoords[1]['x'] == goldCoord['x']) and (pitCoords[1]['y'] == goldCoord['y'])\
-    #     or (pitCoords[1]['x'] == wumpusCoord['x']) and (pitCoords[1]['y'] == wumpusCoord['y']):
-    #     pitCoords[1] = getRandomLocation()
-
-    # while (pitCoords[2]['x'] == pitCoords[1]['x']) and (pitCoords[2]['y'] == pitCoords[1]['y'])\
-    #     or (pitCoords[2]['x'] == pitCoords[0]['x']) and (pitCoords[2]['y'] == pitCoords[0]['y'])\
-    #     or (pitCoords[2]['x'] == goldCoord['x']) and (pitCoords[2]['y'] == goldCoord['y'])\
-    #     or (pitCoords[2]['x'] == wumpusCoord['x']) and (pitCoords[2]['y'] == wumpusCoord['y']):
-    #     pitCoords[2] = getRandomLocation()
-    
-    # for coords in pitCoords:
-    #     breezeCoords.append({'x': coords['x'], 'y': coords['y'] - 1})
-    #     breezeCoords.append({'x': coords['x'], 'y': coords['y'] + 1})
-    #     breezeCoords.append({'x': coords['x'] - 1, 'y': coords['y']})
-    #     breezeCoords.append({'x': coords['x'] + 1, 'y': coords['y']})
-
-    # stenchCoords.append({'x': wumpusCoord['x'], 'y': wumpusCoord['y'] - 1})
-    # stenchCoords.append({'x': wumpusCoord['x'], 'y': wumpusCoord['y'] + 1})
-    # stenchCoords.append({'x': wumpusCoord['x'] - 1, 'y': wumpusCoord['y']})
-    # stenchCoords.append({'x': wumpusCoord['x'] + 1, 'y': wumpusCoord['y']})
-
-    # while True: # main game loop
-    #     for event in pygame.event.get(): # event handling loop
-    #         if event.type == QUIT:
-    #             terminate()
-    #         elif event.type == KEYDOWN:
-    #             if event.key == K_ESCAPE:
-    #                 terminate()
-    #             else:
-    #                 return
-    previous_locations = []
+    previous_locations1 = []
+    previous_locations2 = []
+    previous_locations3 = []
     while True: # main game loop
-        previous_locations.append(agentCoord)
-        if len(previous_locations) >= 5:
-            previous_locations.pop(0)
+        previous_locations1.append(agentCoord1)
+        previous_locations2.append(agentCoord1)
+        previous_locations3.append(agentCoord1)
+        
 
         event =  pygame.event.wait() # event handling loop
         if event.type == QUIT:
@@ -144,13 +137,13 @@ def runGame():
             if event.key == K_ESCAPE:
                 terminate()
             elif event.key == K_DOWN:
-                agentCoord = {'x': agentCoord['x'], 'y': min(agentCoord['y'] + 1, 4)}
+                agentCoord1 = {'x': agentCoord1['x'], 'y': min(agentCoord1['y'] + 1, 19)}
             elif event.key == K_UP:
-                agentCoord = {'x': agentCoord['x'], 'y': max(agentCoord['y'] - 1, 0)}
+                agentCoord1 = {'x': agentCoord1['x'], 'y': max(agentCoord1['y'] - 1, 0)}
             elif event.key == K_LEFT:
-                agentCoord = {'x': max(agentCoord['x'] - 1, 0), 'y': agentCoord['y']}
+                agentCoord1 = {'x': max(agentCoord1['x'] - 1, 0), 'y': agentCoord1['y']}
             elif event.key == K_RIGHT:
-                agentCoord = {'x': min(agentCoord['x'] + 1, 4), 'y': agentCoord['y']}
+                agentCoord1 = {'x': min(agentCoord1['x'] + 1, 19), 'y': agentCoord1['y']}
             elif event.key == K_RETURN:
                 pass
             else:
@@ -160,20 +153,17 @@ def runGame():
             DISPLAYSURF.fill(WHITE)
             drawGrid()
             mainGrid.draw()
-            drawAgent(agentCoord)
-            # drawWumpus(wumpusCoord)
-            # drawGold(goldCoord)
-            # drawPit(pitCoords)
-            # drawBreeze(breezeCoords)
-            # drawStench(stenchCoords)
-            agentCoord = moveAgent(agentCoord, [])
+            drawAgent(agentCoord1)
+            drawAgent(agentCoord2)
+            drawAgent(agentCoord3)
+            # agentCoord = moveAgent(agentCoord, [])
             pygame.display.update()
             FPSCLOCK.tick(FPS)
 
 def getRandomLocations(num):
     possible_locations = []
-    for i in range(5):
-        for j in range(5):
+    for i in range(20):
+        for j in range(20):
             possible_locations.append([i, j])
 
     used = set()
@@ -181,7 +171,7 @@ def getRandomLocations(num):
     i = 0
     while i < num:
         idx = random.randint(1, len(possible_locations) - 1)
-        if idx in used or possible_locations[idx] == [0, 4]:
+        if idx in used or possible_locations[idx] == [0, 19] or possible_locations[idx] == [0, 0] or possible_locations[idx] == [19, 0]:
             continue
         used.add(idx)
         locations.append(possible_locations[idx])
@@ -193,12 +183,12 @@ def getValidMoves(coords):
     x = coords['x']
     y = coords['y']
     if y - 1 > 0:
-        valid_moves.append({'x': x, 'y': y-1})
-    if y + 1 < 5:
-        valid_moves.append({'x': x, 'y': y+1})
+        valid_moves.append({'x': x, 'y': y - 1})
+    if y + 1 < 20:
+        valid_moves.append({'x': x, 'y': y + 1})
     if x - 1 > 0:
-        valid_moves.append({'x': x -  1, 'y': y})
-    if x + 1 < 5:
+        valid_moves.append({'x': x - 1, 'y': y})
+    if x + 1 < 20:
         valid_moves.append({'x': x + 1, 'y': y})
     return valid_moves
 
@@ -207,11 +197,11 @@ def addStenches(coords, grid):
     y = coords[1]
     if y - 1 >= 0:
         grid.tiles[x][y - 1].hasStench = True
-    if y + 1 < 5:
+    if y + 1 < 20:
          grid.tiles[x][y + 1].hasStench = True
     if x - 1 >= 0:
          grid.tiles[x - 1][y].hasStench = True
-    if x + 1 < 5:
+    if x + 1 < 20:
          grid.tiles[x + 1][y].hasStench = True
 
 
@@ -220,11 +210,11 @@ def addBreezes(coords, grid):
     y = coords[1]
     if y - 1 >= 0:
         grid.tiles[x][y - 1].hasBreeze = True
-    if y + 1 < 5:
+    if y + 1 < 20:
          grid.tiles[x][y + 1].hasBreeze = True
     if x - 1 >= 0:
          grid.tiles[x - 1][y].hasBreeze = True
-    if x + 1 < 5:
+    if x + 1 < 20:
          grid.tiles[x + 1][y].hasBreeze = True
 
 def moveAgent(coords, previous_locations):
@@ -254,8 +244,8 @@ def checkForKeyPress():
 
 def showStartScreen():
     titleFont = pygame.font.SysFont('sitkasmallsitkatextbolditalicsitkasubheadingbolditalicsitkaheadingbolditalicsitkadisplaybolditalicsitkabannerbolditalic', 100)
-    titleSurf1 = titleFont.render('Errick\'s', True, LAKER_PURPLE, LAKER_BLACK)
-    titleSurf2 = titleFont.render('Project 2', True, LAKER_GOLD)
+    titleSurf1 = titleFont.render('Wumpus', True, LAKER_PURPLE, LAKER_BLACK)
+    titleSurf2 = titleFont.render('2.0', True, LAKER_GOLD)
 
     degrees1 = 0
     degrees2 = 0
@@ -287,17 +277,13 @@ def terminate():
     sys.exit()
 
 
-def getRandomLocation():
-    return {'x': random.randint(1, 4), 'y': random.randint(0, 3)}
-
-
 def showGameOverScreen():
     gameOverFont = pygame.font.SysFont('sitkasmallsitkatextbolditalicsitkasubheadingbolditalicsitkaheadingbolditalicsitkadisplaybolditalicsitkabannerbolditalic', 150)
     gameSurf = gameOverFont.render('Game', True, RED)
     overSurf = gameOverFont.render('Over', True, RED)
     gameRect = gameSurf.get_rect()
     overRect = overSurf.get_rect()
-    gameRect.midtop = (math.floor(WINDOWWIDTH / 2), 10)
+    gameRect.midtop = (math.floor(WINDOWWIDTH / 2), 500)
     overRect.midtop = (math.floor(WINDOWWIDTH / 2), gameRect.height + 10 + 25)
 
     DISPLAYSURF.blit(gameSurf, gameRect)
@@ -328,7 +314,7 @@ def drawAgent(agentCoord):
 def drawWumpus(wumpusCoord):
     x = wumpusCoord['x'] * CELLSIZE
     y = wumpusCoord['y'] * CELLSIZE
-    wormInnerSegmentRect = pygame.Rect(x + 20, y + 20, CELLSIZE - 40, CELLSIZE - 40)
+    wormInnerSegmentRect = pygame.Rect(x + 10, y + 10, CELLSIZE - 20, CELLSIZE - 20)
     pygame.draw.rect(DISPLAYSURF, DARKGREEN, wormInnerSegmentRect)
 
 
@@ -342,17 +328,17 @@ def drawPit(coords):
 def drawGold(goldCoord):
     x = goldCoord['x'] * CELLSIZE
     y = goldCoord['y'] * CELLSIZE
-    pygame.draw.circle(DISPLAYSURF, LAKER_GOLD, (x + 11, y + 89), RADIUS / 5)
+    pygame.draw.circle(DISPLAYSURF, LAKER_GOLD, (x + 5, y + 45), RADIUS / 5)
 
 def drawBreeze(coords):
     x = coords['x'] * CELLSIZE
     y = coords['y'] * CELLSIZE
-    pygame.draw.circle(DISPLAYSURF, LIGHTBLUE, (x + 89, y + 11), RADIUS / 5)
+    pygame.draw.circle(DISPLAYSURF, LIGHTBLUE, (x + 45, y + 5), RADIUS / 5)
 
 def drawStench(coords):
     x = coords['x'] * CELLSIZE
     y = coords['y'] * CELLSIZE
-    pygame.draw.circle(DISPLAYSURF, GREEN, (x + 11, y + 11), RADIUS / 5)
+    pygame.draw.circle(DISPLAYSURF, GREEN, (x + 5, y + 5), RADIUS / 5)
 
 
 def drawGrid():
@@ -370,6 +356,7 @@ class Tile:
         self.hasWumpus = False
         self.hasPit = False
         self.hasGold = False
+        # self.hasAgent = False
 
     def draw(self):
         coords = {'x': self.x, 'y': self.y}
