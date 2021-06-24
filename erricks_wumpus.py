@@ -114,12 +114,6 @@ def runGame():
     starty2 = 0
     startx3 = 19
     starty3 = 0
-    # agentCoord1 = {'x': startx1, 'y': starty1}
-    # agentCoord2 = {'x': startx2, 'y': starty2}
-    # agentCoord3 = {'x': startx3, 'y': starty3}
-    # direction1 = UP
-    # direction2 = RIGHT
-    # direction3 = DOWN
 
     agentCoord1 = Agent(startx1, starty1, UP)
     agentCoord2 = Agent(startx2, starty2, RIGHT)
@@ -140,43 +134,58 @@ def runGame():
         elif event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 terminate()
-            if event.key == K_UP:
-                if agentCoord1.direction == DOWN:
-                    agentCoord1.y = min(agentCoord1.y + 1, 19)
-                elif agentCoord1.direction == UP:
-                    agentCoord1.y = max(agentCoord1.y - 1, 0)
-                elif agentCoord1.direction == LEFT:
-                    agentCoord1.x = max(agentCoord1.x - 1, 0)
-                elif agentCoord1.direction == RIGHT:
-                    agentCoord1.x = min(agentCoord1.x + 1, 19)
-            elif event.key == K_LEFT:
-                if agentCoord1.direction == UP:
-                    agentCoord1.direction = LEFT
-                elif agentCoord1.direction == LEFT:
-                    agentCoord1.direction = DOWN
-                elif agentCoord1.direction == DOWN:
-                    agentCoord1.direction = RIGHT
+            if not agentCoord1.isDead:
+                if event.key == K_UP:
+                    if agentCoord1.direction == DOWN:
+                        agentCoord1.y = min(agentCoord1.y + 1, 19)
+                    elif agentCoord1.direction == UP:
+                        agentCoord1.y = max(agentCoord1.y - 1, 0)
+                    elif agentCoord1.direction == LEFT:
+                        agentCoord1.x = max(agentCoord1.x - 1, 0)
+                    elif agentCoord1.direction == RIGHT:
+                        agentCoord1.x = min(agentCoord1.x + 1, 19)
+                elif event.key == K_LEFT:
+                    if agentCoord1.direction == UP:
+                        agentCoord1.direction = LEFT
+                    elif agentCoord1.direction == LEFT:
+                        agentCoord1.direction = DOWN
+                    elif agentCoord1.direction == DOWN:
+                        agentCoord1.direction = RIGHT
+                    else:
+                        agentCoord1.direction = UP
+                elif event.key == K_RIGHT:
+                    if agentCoord1.direction == UP:
+                        agentCoord1.direction = RIGHT
+                    elif agentCoord1.direction == RIGHT:
+                        agentCoord1.direction = DOWN
+                    elif agentCoord1.direction == DOWN:
+                        agentCoord1.direction = LEFT
+                    else:
+                        agentCoord1.direction = UP
+                elif event.key == K_RETURN:
+                    pass
                 else:
-                    agentCoord1.direction = UP
-            elif event.key == K_RIGHT:
-                if agentCoord1.direction == UP:
-                    agentCoord1.direction = RIGHT
-                elif agentCoord1.direction == RIGHT:
-                    agentCoord1.direction = DOWN
-                elif agentCoord1.direction == DOWN:
-                    agentCoord1.direction = LEFT
-                else:
-                    agentCoord1.direction = UP
-            elif event.key == K_RETURN:
-                pass
-            else:
-                print(event.key)
-                return
+                    print(event.key)
+                    return
         
-        #check if gold is in same tile as agent
+        # check if gold is in same tile as agent
         if mainGrid.tiles[agentCoord1.x][agentCoord1.y].hasGold:
             mainGrid.tiles[agentCoord1.x][agentCoord1.y].hasGold = False
             agentCoord1.hasGold = True
+
+        # check if agent has died by wumpus
+        if mainGrid.tiles[agentCoord1.x][agentCoord1.y].hasWumpus:
+            agentCoord1.isDead = True
+            if agentCoord1.hasGold == True:
+                agentCoord1.hasGold = False
+                mainGrid.tiles[agentCoord1.x][agentCoord1.y].hasGold = True
+        
+        # check if agent falls in put 
+        if mainGrid.tiles[agentCoord1.x][agentCoord1.y].hasPit:
+            agentCoord1.isDead = True
+            if agentCoord1.hasGold == True:
+                agentCoord1.hasGold = False
+                mainGrid.tiles[agentCoord1.x][agentCoord1.y].hasGold = True
 
         DISPLAYSURF.fill(WHITE)
         drawGrid()
