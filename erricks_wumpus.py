@@ -114,20 +114,24 @@ def runGame():
     starty2 = 0
     startx3 = 19
     starty3 = 0
-    agentCoord1 = {'x': startx1, 'y': starty1}
-    agentCoord2 = {'x': startx2, 'y': starty2}
-    agentCoord3 = {'x': startx3, 'y': starty3}
-    direction1 = UP
-    direction2 = RIGHT
-    direction3 = DOWN
+    # agentCoord1 = {'x': startx1, 'y': starty1}
+    # agentCoord2 = {'x': startx2, 'y': starty2}
+    # agentCoord3 = {'x': startx3, 'y': starty3}
+    # direction1 = UP
+    # direction2 = RIGHT
+    # direction3 = DOWN
+
+    agentCoord1 = Agent(startx1, starty1, UP)
+    agentCoord2 = Agent(startx2, starty2, RIGHT)
+    agentCoord3 = Agent(startx3, starty3, DOWN)
 
     previous_locations1 = []
     previous_locations2 = []
     previous_locations3 = []
     while True: # main game loop
         previous_locations1.append(agentCoord1)
-        previous_locations2.append(agentCoord1)
-        previous_locations3.append(agentCoord1)
+        previous_locations2.append(agentCoord2)
+        previous_locations3.append(agentCoord3)
         
 
         event =  pygame.event.wait() # event handling loop
@@ -137,46 +141,51 @@ def runGame():
             if event.key == K_ESCAPE:
                 terminate()
             if event.key == K_UP:
-                if direction1 == DOWN:
-                    agentCoord1 = {'x': agentCoord1['x'], 'y': min(agentCoord1['y'] + 1, 19)}
-                elif direction1 == UP:
-                    agentCoord1 = {'x': agentCoord1['x'], 'y': max(agentCoord1['y'] - 1, 0)}
-                elif direction1 == LEFT:
-                    agentCoord1 = {'x': max(agentCoord1['x'] - 1, 0), 'y': agentCoord1['y']}
-                elif direction1 == RIGHT:
-                    agentCoord1 = {'x': min(agentCoord1['x'] + 1, 19), 'y': agentCoord1['y']}
+                if agentCoord1.direction == DOWN:
+                    agentCoord1.y = min(agentCoord1.y + 1, 19)
+                elif agentCoord1.direction == UP:
+                    agentCoord1.y = max(agentCoord1.y - 1, 0)
+                elif agentCoord1.direction == LEFT:
+                    agentCoord1.x = max(agentCoord1.x - 1, 0)
+                elif agentCoord1.direction == RIGHT:
+                    agentCoord1.x = min(agentCoord1.x + 1, 19)
             elif event.key == K_LEFT:
-                if direction1 == UP:
-                    direction1 = LEFT
-                elif direction1 == LEFT:
-                    direction1 = DOWN
-                elif direction1 == DOWN:
-                    direction1 = RIGHT
+                if agentCoord1.direction == UP:
+                    agentCoord1.direction = LEFT
+                elif agentCoord1.direction == LEFT:
+                    agentCoord1.direction = DOWN
+                elif agentCoord1.direction == DOWN:
+                    agentCoord1.direction = RIGHT
                 else:
-                    direction1 = UP
+                    agentCoord1.direction = UP
             elif event.key == K_RIGHT:
-                if direction1 == UP:
-                    direction1 = RIGHT
-                elif direction1 == RIGHT:
-                    direction1 = DOWN
-                elif direction1 == DOWN:
-                    direction1 = LEFT
+                if agentCoord1.direction == UP:
+                    agentCoord1.direction = RIGHT
+                elif agentCoord1.direction == RIGHT:
+                    agentCoord1.direction = DOWN
+                elif agentCoord1.direction == DOWN:
+                    agentCoord1.direction = LEFT
                 else:
-                    direction1 = UP
+                    agentCoord1.direction = UP
             elif event.key == K_RETURN:
                 pass
             else:
                 print(event.key)
                 return
-            DISPLAYSURF.fill(WHITE)
-            drawGrid()
-            mainGrid.draw()
-            drawAgent(agentCoord1, direction1)
-            drawAgent(agentCoord2, direction2)
-            drawAgent(agentCoord3, direction3)
-            # agentCoord = moveAgent(agentCoord, [])
-            pygame.display.update()
-            FPSCLOCK.tick(FPS)
+        
+        #check if gold is in same tile as agent
+        if mainGrid.tiles[agentCoord1.x][agentCoord1.y].hasGold:
+            mainGrid.tiles[agentCoord1.x][agentCoord1.y].hasGold = False
+            agentCoord1.hasGold = True
+
+        DISPLAYSURF.fill(WHITE)
+        drawGrid()
+        mainGrid.draw()
+        agentCoord1.draw()
+        agentCoord2.draw()
+        agentCoord3.draw()
+        pygame.display.update()
+        FPSCLOCK.tick(FPS)
 
 def getRandomLocations(num):
     possible_locations = []
@@ -349,11 +358,29 @@ def drawAgent(agentCoord, direction):
         directionRect.topleft = (x + 35, y + 35)
         DISPLAYSURF.blit(directionSurf, directionRect)
 
+def drawDeadAgent(agentCoord):
+    agentDeadFont = pygame.font.SysFont('sitkasmallsitkatextbolditalicsitkasubheadingbolditalicsitkaheadingbolditalicsitkadisplaybolditalicsitkabannerbolditalic', 10)
+    x = agentCoord['x'] * CELLSIZE
+    y = agentCoord['y'] * CELLSIZE
+    xcenter = agentCoord['x'] * CELLSIZE + math.floor(CELLSIZE / 2)
+    ycenter = agentCoord['y'] * CELLSIZE+ math.floor(CELLSIZE / 2)
+    pygame.draw.circle(DISPLAYSURF, RED, (xcenter, ycenter), RADIUS / 2)
+    directionSurf = agentDeadFont.render('DEAD', True, RED)
+    directionRect = directionSurf.get_rect()
+    directionRect.topleft = (x + 18, y + 40)
+    DISPLAYSURF.blit(directionSurf, directionRect)
+
 def drawWumpus(wumpusCoord):
     x = wumpusCoord['x'] * CELLSIZE
     y = wumpusCoord['y'] * CELLSIZE
     wormInnerSegmentRect = pygame.Rect(x + 10, y + 10, CELLSIZE - 20, CELLSIZE - 20)
     pygame.draw.rect(DISPLAYSURF, DARKGREEN, wormInnerSegmentRect)
+
+def drawDeadWumpus(wumpusCoord):
+    x = wumpusCoord['x'] * CELLSIZE
+    y = wumpusCoord['y'] * CELLSIZE
+    wormInnerSegmentRect = pygame.Rect(x + 10, y + 10, CELLSIZE - 20, CELLSIZE - 20)
+    pygame.draw.rect(DISPLAYSURF, RED, wormInnerSegmentRect)
 
 
 def drawPit(coords):
@@ -385,6 +412,25 @@ def drawGrid():
     for y in range(0, WINDOWHEIGHT, CELLSIZE): # draw horizontal lines
         pygame.draw.line(DISPLAYSURF, DARKGRAY, (0, y), (WINDOWWIDTH, y))
 
+class Agent:
+    def __init__(self, x, y, direction):
+        self.x = x
+        self.y = y
+        self.arrows = 3
+        self.direction = direction
+        self.hasGold = False
+        self.isDead = False
+        self.score = 0
+
+    def draw(self):
+        coords = {'x': self.x, 'y': self.y}
+        if self.hasGold:
+            drawGold(coords)
+        if self.isDead:
+            drawDeadAgent(coords)
+        else:
+            drawAgent(coords, self.direction)
+
 class Tile:
     def __init__(self, x, y):
         self.x = x
@@ -394,6 +440,7 @@ class Tile:
         self.hasWumpus = False
         self.hasPit = False
         self.hasGold = False
+        self.tilesVisited = []
         # self.hasAgent = False
 
     def draw(self):
