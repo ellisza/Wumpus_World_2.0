@@ -180,13 +180,36 @@ def runGame():
                 agentCoord1.hasGold = False
                 mainGrid.tiles[agentCoord1.x][agentCoord1.y].hasGold = True
         
-        # check if agent falls in put 
+        # check if agent falls in pit 
         if mainGrid.tiles[agentCoord1.x][agentCoord1.y].hasPit:
             agentCoord1.isDead = True
             if agentCoord1.hasGold == True:
                 agentCoord1.hasGold = False
                 mainGrid.tiles[agentCoord1.x][agentCoord1.y].hasGold = True
 
+        # Check location for senses, pass those to agents current location senses array.
+        if mainGrid.tiles[agentCoord1.x][agentCoord1.y].hasBreeze:
+            agentCoord1.senses[0] = True
+        else:
+            agentCoord1.senses[0] = False
+        
+        if mainGrid.tiles[agentCoord1.x][agentCoord1.y].hasStench:
+            agentCoord1.senses[1] = True
+        else:
+            agentCoord1.senses[1] = False
+
+        #if mainGrid.tiles[agentCoord1.x][agentCoord1.y].hasNoise:
+        #    agentCoord1.senses[2] = True
+        #else:
+        #    agentCoord1.senses[2] = False
+        
+        # Let agent make a decision on next move
+        moveAgent1 = agentCoord1.moveDecision()
+
+        # Tell agent to make it's key press
+        agentCoord1.makeMove(moveAgent1)
+
+        # After updating senses
         DISPLAYSURF.fill(WHITE)
         drawGrid()
         mainGrid.draw()
@@ -430,6 +453,33 @@ class Agent:
         self.hasGold = False
         self.isDead = False
         self.score = 0
+        # These are Breeze, Stench, Noise in order
+        self.senses = [False, False, False]
+
+    def moveDecision(self):
+
+        #We need to code this
+        #Have this return a movement. Either turn left or right, move forward, or shoot an arrow.
+        #For now, we'll have him go up as a test.
+        if self.direction == UP:
+            return "forward"
+        
+
+    def makeMove(self, move):
+        if move == "forward":
+            pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_UP))
+            pygame.event.post(pygame.event.Event(pygame.KEYUP, key=pygame.K_UP))
+        elif move == "left":
+            pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_LEFT))
+            pygame.event.post(pygame.event.Event(pygame.KEYUP, key=pygame.K_LEFT))
+        elif move == "right":
+            pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RIGHT))
+            pygame.event.post(pygame.event.Event(pygame.KEYUP, key=pygame.K_RIGHT))
+        elif move == "shoot":
+            pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_UP))
+            pygame.event.post(pygame.event.Event(pygame.KEYUP, key=pygame.K_UP))
+        else:
+            pass
 
     def draw(self):
         coords = {'x': self.x, 'y': self.y}
