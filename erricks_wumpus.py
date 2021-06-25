@@ -7,8 +7,8 @@ import random, pygame, sys, math
 from pygame.locals import *
 
 FPS = 5
-WINDOWWIDTH = 1000
-WINDOWHEIGHT = 1000
+WINDOWWIDTH = 500
+WINDOWHEIGHT = 500
 CELLSIZE = 50
 RADIUS = math.floor(CELLSIZE / 2.5)
 assert WINDOWWIDTH % CELLSIZE == 0, "Window width must be a multiple of cell size."
@@ -57,7 +57,7 @@ def main():
 
 
 def runGame():
-    mainGrid = Grid(20, 20)
+    mainGrid = Grid(10, 10)
     mapElements = getRandomLocations(13)
 
     coords = mapElements[0]
@@ -113,10 +113,10 @@ def runGame():
 
     # Set start point for agent
     startx1 = 0
-    starty1 = 19
+    starty1 = 9
     startx2 = 0
     starty2 = 0
-    startx3 = 19
+    startx3 = 9
     starty3 = 0
 
     agentCoord1 = Agent(startx1, starty1, UP)
@@ -144,13 +144,13 @@ def runGame():
             if not agentCoord1.isDead:
                 if event.key == K_UP:
                     if agentCoord1.direction == DOWN:
-                        agentCoord1.y = min(agentCoord1.y + 1, 19)
+                        agentCoord1.y = min(agentCoord1.y + 1, 9)
                     elif agentCoord1.direction == UP:
                         agentCoord1.y = max(agentCoord1.y - 1, 0)
                     elif agentCoord1.direction == LEFT:
                         agentCoord1.x = max(agentCoord1.x - 1, 0)
                     elif agentCoord1.direction == RIGHT:
-                        agentCoord1.x = min(agentCoord1.x + 1, 19)
+                        agentCoord1.x = min(agentCoord1.x + 1, 9)
                 elif event.key == K_LEFT:
                     if agentCoord1.direction == UP:
                         agentCoord1.direction = LEFT
@@ -232,8 +232,8 @@ def runGame():
 
 def getRandomLocations(num):
     possible_locations = []
-    for i in range(20):
-        for j in range(20):
+    for i in range(10):
+        for j in range(10):
             possible_locations.append([i, j])
 
     used = set()
@@ -241,8 +241,8 @@ def getRandomLocations(num):
     i = 0
     while i < num:
         idx = random.randint(1, len(possible_locations) - 1)
-        if idx in used or possible_locations[idx] == [0, 19] or possible_locations[idx] == [0, 0] or possible_locations[
-            idx] == [19, 0]:
+        if idx in used or possible_locations[idx] == [0, 9] or possible_locations[idx] == [0, 0] or possible_locations[
+            idx] == [9, 0]:
             continue
         used.add(idx)
         locations.append(possible_locations[idx])
@@ -256,11 +256,11 @@ def getValidMoves(coords):
     y = coords['y']
     if y - 1 > 0:
         valid_moves.append({'x': x, 'y': y - 1})
-    if y + 1 < 20:
+    if y + 1 < 10:
         valid_moves.append({'x': x, 'y': y + 1})
     if x - 1 > 0:
         valid_moves.append({'x': x - 1, 'y': y})
-    if x + 1 < 20:
+    if x + 1 < 10:
         valid_moves.append({'x': x + 1, 'y': y})
     return valid_moves
 
@@ -270,11 +270,11 @@ def addStenches(coords, grid):
     y = coords[1]
     if y - 1 >= 0:
         grid.tiles[x][y - 1].hasStench = True
-    if y + 1 < 20:
+    if y + 1 < 10:
         grid.tiles[x][y + 1].hasStench = True
     if x - 1 >= 0:
         grid.tiles[x - 1][y].hasStench = True
-    if x + 1 < 20:
+    if x + 1 < 10:
         grid.tiles[x + 1][y].hasStench = True
 
 
@@ -283,11 +283,11 @@ def addBreezes(coords, grid):
     y = coords[1]
     if y - 1 >= 0:
         grid.tiles[x][y - 1].hasBreeze = True
-    if y + 1 < 20:
+    if y + 1 < 10:
         grid.tiles[x][y + 1].hasBreeze = True
     if x - 1 >= 0:
         grid.tiles[x - 1][y].hasBreeze = True
-    if x + 1 < 20:
+    if x + 1 < 10:
         grid.tiles[x + 1][y].hasBreeze = True
 
 
@@ -296,11 +296,11 @@ def addNoises(coords, grid):
     y = coords[1]
     if y - 1 >= 0:
         grid.tiles[x][y - 1].hasNoise = True
-    if y + 1 < 20:
+    if y + 1 < 10:
         grid.tiles[x][y + 1].hasNoise = True
     if x - 1 >= 0:
         grid.tiles[x - 1][y].hasNoise = True
-    if x + 1 < 20:
+    if x + 1 < 10:
         grid.tiles[x + 1][y].hasNoise = True
 
 
@@ -460,7 +460,7 @@ def drawPit(coords):
     y = coords['y'] * CELLSIZE
     xcenter = coords['x'] * CELLSIZE + math.floor(CELLSIZE / 2)
     ycenter = coords['y'] * CELLSIZE + math.floor(CELLSIZE / 2)
-    pygame.draw.circle(DISPLAYSURF, LAKER_PURPLE, (xcenter, ycenter), RADIUS)
+    pygame.draw.circle(DISPLAYSURF, LAKER_PURPLE, (xcenter, ycenter), RADIUS - 5)
 
 
 def drawGold(goldCoord):
@@ -509,9 +509,9 @@ class Agent:
 
         self.model = []
         temp = []
-        for i in range(0, 20):
+        for i in range(0, 10):
             temp = []
-            for j in range(0, 20):
+            for j in range(0, 10):
                 temp2 = {'Breeze': False, 'Stench': False, 'Wumpus': False, 'Pit': False, 'Noise': False, 'Visited': False, 'Potential_Agent': False,
                          'Breeze_Adjacent': 0, 'Stench_Adjacent': 0, 'X': j, 'Y': i}
                 temp.append(temp2)
@@ -534,15 +534,15 @@ class Agent:
 
     # Helper Function - Removes all Noise Flags in all rooms in self.model, along with setting Potential_Agent to False in all rooms in self.model
     def clearNoiseFlagsFromModel(self):
-        for i in range(0, 20):
-            for j in range(0, 20):
+        for i in range(0, 10):
+            for j in range(0, 10):
                 rm = self.model[i][j]
                 rm['Noise'] = False
                 rm['Potential_Agnet'] = False
 
     # Helper Function - Returns the room object in self.model at desiredX,desiredY location - returns None if it went out of bounds
     def getRoomInModel(self, desiredX, desiredY):
-        if desiredX >= 0 and desiredY >= 0 and desiredX < 20 and desiredY < 20:
+        if desiredX >= 0 and desiredY >= 0 and desiredX < 10 and desiredY < 10:
             return self.model[desiredX][desiredY]
 
     # Helper Function - Returns the room object in self.model that is above the agents current room - returns None if it went out of bounds
@@ -563,8 +563,8 @@ class Agent:
 
     # Helper Function - Loops through each room object in the self.model and updates the Breeze_Adjacent and Stench_Adjacent counts, Also updates the Potential_Agent 
     def runModelCheck(self):
-        for i in range(0, 20):
-            for j in range(0, 20):
+        for i in range(0, 10):
+            for j in range(0, 10):
                 current_room = self.model[j][i]
                 above = self.getModelRoomAbove()
                 below = self.getModelRoomBelow()
@@ -621,13 +621,13 @@ class Agent:
             if self.y > 0:
                 return self.getModelRoomAbove()
         elif self.direction == DOWN:
-            if self.y < 19:
+            if self.y < 9:
                 return self.getModelRoomBelow()
         elif self.direction == LEFT:
             if self.x > 0:
                 return self.getModelRoomLeft()
         elif self.direction == RIGHT:
-            if self.x < 19:
+            if self.x < 9:
                 return self.getModelRoomRight()
         return None
 
