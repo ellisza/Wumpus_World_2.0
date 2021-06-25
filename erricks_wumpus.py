@@ -174,6 +174,72 @@ def runGame():
                 else:
                     print(event.key)
                     return
+            if not agentCoord2.isDead:
+                if event.key == K_UP:
+                    if agentCoord2.direction == DOWN:
+                        agentCoord2.y = min(agentCoord2.y + 1, 19)
+                    elif agentCoord2.direction == UP:
+                        agentCoord2.y = max(agentCoord2.y - 1, 0)
+                    elif agentCoord2.direction == LEFT:
+                        agentCoord2.x = max(agentCoord2.x - 1, 0)
+                    elif agentCoord2.direction == RIGHT:
+                        agentCoord2.x = min(agentCoord2.x + 1, 19)
+                elif event.key == K_LEFT:
+                    if agentCoord2.direction == UP:
+                        agentCoord2.direction = LEFT
+                    elif agentCoord2.direction == LEFT:
+                        agentCoord2.direction = DOWN
+                    elif agentCoord2.direction == DOWN:
+                        agentCoord2.direction = RIGHT
+                    else:
+                        agentCoord2.direction = UP
+                elif event.key == K_RIGHT:
+                    if agentCoord2.direction == UP:
+                        agentCoord2.direction = RIGHT
+                    elif agentCoord2.direction == RIGHT:
+                        agentCoord2.direction = DOWN
+                    elif agentCoord2.direction == DOWN:
+                        agentCoord2.direction = LEFT
+                    else:
+                        agentCoord2.direction = UP
+                elif event.key == K_RETURN:
+                    pass
+                else:
+                    print(event.key)
+                    return
+            if not agentCoord3.isDead:
+                if event.key == K_UP:
+                    if agentCoord3.direction == DOWN:
+                        agentCoord3.y = min(agentCoord3.y + 1, 19)
+                    elif agentCoord3.direction == UP:
+                        agentCoord3.y = max(agentCoord3.y - 1, 0)
+                    elif agentCoord3.direction == LEFT:
+                        agentCoord3.x = max(agentCoord3.x - 1, 0)
+                    elif agentCoord3.direction == RIGHT:
+                        agentCoord3.x = min(agentCoord3.x + 1, 19)
+                elif event.key == K_LEFT:
+                    if agentCoord3.direction == UP:
+                        agentCoord3.direction = LEFT
+                    elif agentCoord3.direction == LEFT:
+                        agentCoord3.direction = DOWN
+                    elif agentCoord3.direction == DOWN:
+                        agentCoord3.direction = RIGHT
+                    else:
+                        agentCoord3.direction = UP
+                elif event.key == K_RIGHT:
+                    if agentCoord3.direction == UP:
+                        agentCoord3.direction = RIGHT
+                    elif agentCoord3.direction == RIGHT:
+                        agentCoord3.direction = DOWN
+                    elif agentCoord3.direction == DOWN:
+                        agentCoord3.direction = LEFT
+                    else:
+                        agentCoord3.direction = UP
+                elif event.key == K_RETURN:
+                    pass
+                else:
+                    print(event.key)
+                    return
 
         # check if gold is in same tile as agent
         if mainGrid.tiles[agentCoord1.x][agentCoord1.y].hasGold:
@@ -205,10 +271,10 @@ def runGame():
         else:
             agentCoord1.senses[1] = False
 
-        # if mainGrid.tiles[agentCoord1.x][agentCoord1.y].hasNoise:
-        #    agentCoord1.senses[2] = True
-        # else:
-        #    agentCoord1.senses[2] = False
+        if mainGrid.tiles[agentCoord1.x][agentCoord1.y].hasNoise:
+           agentCoord1.senses[2] = True
+        else:
+           agentCoord1.senses[2] = False
 
         # Let agent make a decision on next move
         # moveAgent1 = agentCoord1.moveDecision()
@@ -216,6 +282,90 @@ def runGame():
 
         # Tell agent to make it's key press
         agentCoord1.makeMove(moveAgent1)
+
+        # check if gold is in same tile as agent
+        if mainGrid.tiles[agentCoord2.x][agentCoord2.y].hasGold:
+            mainGrid.tiles[agentCoord2.x][agentCoord2.y].hasGold = False
+            agentCoord2.hasGold = True
+
+        # check if agent has died by wumpus
+        if mainGrid.tiles[agentCoord2.x][agentCoord2.y].hasWumpus:
+            agentCoord2.isDead = True
+            if agentCoord2.hasGold == True:
+                agentCoord2.hasGold = False
+                mainGrid.tiles[agentCoord2.x][agentCoord2.y].hasGold = True
+
+        # check if agent falls in pit
+        if mainGrid.tiles[agentCoord2.x][agentCoord2.y].hasPit:
+            agentCoord2.isDead = True
+            if agentCoord2.hasGold == True:
+                agentCoord2.hasGold = False
+                mainGrid.tiles[agentCoord2.x][agentCoord2.y].hasGold = True
+
+        # Check location for senses, pass those to agents current location senses array.
+        if mainGrid.tiles[agentCoord2.x][agentCoord2.y].hasBreeze:
+            agentCoord2.senses[0] = True
+        else:
+            agentCoord2.senses[0] = False
+
+        if mainGrid.tiles[agentCoord2.x][agentCoord2.y].hasStench:
+            agentCoord2.senses[1] = True
+        else:
+            agentCoord2.senses[1] = False
+
+        if mainGrid.tiles[agentCoord2.x][agentCoord2.y].hasNoise:
+           agentCoord2.senses[2] = True
+        else:
+           agentCoord2.senses[2] = False
+
+        # Let agent make a decision on next move
+        # moveAgent1 = agentCoord2.moveDecision()
+        moveAgent1 = agentCoord2.moveDecisionOne()
+
+        # Tell agent to make it's key press
+        agentCoord2.makeMove(moveAgent1)
+
+        # check if gold is in same tile as agent
+        if mainGrid.tiles[agentCoord3.x][agentCoord3.y].hasGold:
+            mainGrid.tiles[agentCoord3.x][agentCoord3.y].hasGold = False
+            agentCoord3.hasGold = True
+
+        # check if agent has died by wumpus
+        if mainGrid.tiles[agentCoord3.x][agentCoord3.y].hasWumpus:
+            agentCoord3.isDead = True
+            if agentCoord3.hasGold == True:
+                agentCoord3.hasGold = False
+                mainGrid.tiles[agentCoord3.x][agentCoord3.y].hasGold = True
+
+        # check if agent falls in pit
+        if mainGrid.tiles[agentCoord3.x][agentCoord3.y].hasPit:
+            agentCoord3.isDead = True
+            if agentCoord3.hasGold == True:
+                agentCoord3.hasGold = False
+                mainGrid.tiles[agentCoord3.x][agentCoord3.y].hasGold = True
+
+        # Check location for senses, pass those to agents current location senses array.
+        if mainGrid.tiles[agentCoord3.x][agentCoord3.y].hasBreeze:
+            agentCoord3.senses[0] = True
+        else:
+            agentCoord3.senses[0] = False
+
+        if mainGrid.tiles[agentCoord3.x][agentCoord3.y].hasStench:
+            agentCoord3.senses[1] = True
+        else:
+            agentCoord3.senses[1] = False
+
+        if mainGrid.tiles[agentCoord3.x][agentCoord3.y].hasNoise:
+           agentCoord3.senses[2] = True
+        else:
+           agentCoord3.senses[2] = False
+
+        # Let agent make a decision on next move
+        # moveAgent1 = agentCoord3.moveDecision()
+        moveAgent1 = agentCoord3.moveDecisionOne()
+
+        # Tell agent to make it's key press
+        agentCoord3.makeMove(moveAgent1)
 
         # After updating senses
         DISPLAYSURF.fill(WHITE)
@@ -506,6 +656,7 @@ class Agent:
         self.score = 0
         # These are Breeze, Stench, Noise in order
         self.senses = [False, False, False]
+        self.undo = False
 
         self.model = []
         temp = []
@@ -538,7 +689,7 @@ class Agent:
             for j in range(0, 20):
                 rm = self.model[i][j]
                 rm['Noise'] = False
-                rm['Potential_Agnet'] = False
+                rm['Potential_Agent'] = False
 
     # Helper Function - Returns the room object in self.model at desiredX,desiredY location - returns None if it went out of bounds
     def getRoomInModel(self, desiredX, desiredY):
@@ -786,7 +937,36 @@ class Agent:
             elif result == 'left':
                 self.num_rotations = self.num_rotations + 1
                 self.movesMade.append(2)
-            return result            
+            return result           
+
+    def moveDecisionTwo(self):
+        self.clearNoiseFlagsFromModel()
+        self.updateModel()
+        if self.hasGold == True:
+            if self.return_mode == False:
+                self.return_mode = True
+                self.movesMade.reverse()
+            return self.returningToStart()
+        elif self.undo == True:
+            self.undo = False
+            pass
+        else:
+            result = self.exploreWorld()
+            if result == 'forward':
+                self.num_rotations = 0
+                self.movesMade.append(0)
+            elif result == 'right':
+                self.num_rotations = self.num_rotations + 1
+                self.movesMade.append(1)
+            elif result == 'left':
+                self.num_rotations = self.num_rotations + 1
+                self.movesMade.append(2)
+            return result
+
+    def exploreWorld(self):
+        if True in self.senses:
+            self.repeat = True
+
 
     def makeMove(self, move):
         if move == "forward":
