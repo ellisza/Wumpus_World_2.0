@@ -24,6 +24,7 @@ GREEN = (0, 255, 0)
 DARKGREEN = (0, 155, 0)
 LIGHTBLUE = (193, 225, 236)
 DARKGRAY = (40, 40, 40)
+LIGHTGRAY = (83, 83, 83)
 YELLOW = (255, 255, 0)
 LAKER_PURPLE = (85, 37, 130)
 LAKER_GOLD = (253, 185, 39)
@@ -119,8 +120,12 @@ def runGame():
     starty3 = 0
 
     agentCoord1 = Agent(startx1, starty1, UP)
+    addNoises([startx1, starty1], mainGrid)
     agentCoord2 = Agent(startx2, starty2, RIGHT)
+    addNoises([startx2, starty2], mainGrid)
     agentCoord3 = Agent(startx3, starty3, DOWN)
+    addNoises([startx3, starty3], mainGrid)
+
 
     previous_locations1 = []
     previous_locations2 = []
@@ -215,10 +220,12 @@ def runGame():
         # After updating senses
         DISPLAYSURF.fill(WHITE)
         drawGrid()
-        mainGrid.draw()
-        agentCoord1.draw()
-        agentCoord2.draw()
-        agentCoord3.draw()
+        addNoises([agentCoord1.x, agentCoord1.y], mainGrid)
+        addNoises([agentCoord2.x, agentCoord2.y], mainGrid)
+        addNoises([agentCoord3.x, agentCoord3.y], mainGrid)
+        mainGrid.draw(agentCoord1)
+        mainGrid.draw(agentCoord2)
+        mainGrid.draw(agentCoord3)
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 
@@ -282,6 +289,19 @@ def addBreezes(coords, grid):
         grid.tiles[x - 1][y].hasBreeze = True
     if x + 1 < 20:
         grid.tiles[x + 1][y].hasBreeze = True
+
+
+def addNoises(coords, grid):
+    x = coords[0]
+    y = coords[1]
+    if y - 1 >= 0:
+        grid.tiles[x][y - 1].hasNoise = True
+    if y + 1 < 20:
+        grid.tiles[x][y + 1].hasNoise = True
+    if x - 1 >= 0:
+        grid.tiles[x - 1][y].hasNoise = True
+    if x + 1 < 20:
+        grid.tiles[x + 1][y].hasNoise = True
 
 
 def moveAgent(coords, previous_locations):
@@ -459,6 +479,11 @@ def drawStench(coords):
     x = coords['x'] * CELLSIZE
     y = coords['y'] * CELLSIZE
     pygame.draw.circle(DISPLAYSURF, GREEN, (x + 5, y + 5), RADIUS / 5)
+
+def drawNoise(coords):
+    x = coords['x'] * CELLSIZE
+    y = coords['y'] * CELLSIZE
+    pygame.draw.circle(DISPLAYSURF, DARKGRAY, (x + 25, y + 5), RADIUS / 5)
 
 
 def drawGrid():
@@ -809,15 +834,17 @@ class Tile:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        self.startX = x
+        self.startY = y
         self.hasStench = False
         self.hasBreeze = False
         self.hasWumpus = False
         self.hasPit = False
         self.hasGold = False
+        self.hasNoise = False
         self.tilesVisited = []
-        # self.hasAgent = False
 
-    def draw(self):
+    def draw(self, agent):
         coords = {'x': self.x, 'y': self.y}
         if self.hasPit:
             drawPit(coords)
@@ -829,6 +856,11 @@ class Tile:
             drawBreeze(coords)
         if self.hasGold:
             drawGold(coords)
+        if self.hasNoise:
+            self.hasNoise = False
+            drawNoise(coords)
+        agent.draw()
+        
 
 
 class Grid:
@@ -839,10 +871,10 @@ class Grid:
             for h in range(height):
                 self.tiles[w].append(Tile(w, h))
 
-    def draw(self):
+    def draw(self, agent):
         for row in self.tiles:
             for tile in row:
-                tile.draw()
+                tile.draw(agent)
 
 
 if __name__ == '__main__':
