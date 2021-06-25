@@ -207,8 +207,7 @@ def runGame():
 
         # Let agent make a decision on next move
         moveAgent1 = agentCoord1.moveDecision()
-        # moveAgent1 = agentCoord1.moveDecisionTwo()
-        
+
         # Tell agent to make it's key press
         agentCoord1.makeMove(moveAgent1)
 
@@ -487,7 +486,8 @@ class Agent:
         for i in range(0, 20):
             temp = []
             for j in range(0, 20):
-                temp2 = {'Breeze': False, 'Stench': False, 'Wumpus': False, 'Pit': False, 'Visited': False, 'Breeze_Adjacent': 0, 'Stench_Adjacent': 0}
+                temp2 = {'Breeze': False, 'Stench': False, 'Wumpus': False, 'Pit': False, 'Noise': False, 'Visited': False, 'Potential_Agent': True,
+                         'Breeze_Adjacent': 0, 'Stench_Adjacent': 0}
                 temp.append(temp2)
             self.model.append(temp)
         self.movesMade = []
@@ -504,303 +504,89 @@ class Agent:
             return "forward"
 
 
-    # Helper Function for moveDecisionTwo
-    def updateModel(self):
-        for x in range(0, 20):
-            for y in range(0, 20):
-                rm = self.model[x][y]
+    def clearNoiseFlagsFromModel(self):
+        for i in range(0, 20):
+            for j in range(0, 20):
+                rm = self.model[i][j]
+                rm['Noise'] = False
+                rm['Potential_Agnet'] = False
+
+
+    def getRoomInModel(self, desiredX, desiredY):
+        if desiredX >= 0 and desiredY >= 0 and desiredX < 20 and desiredY < 20:
+            return self.model[desiredX][desiredY]
+
+
+    def getModelRoomAbove(self):
+        return self.getRoomInModel(self.x-1, self.y)
+
+
+    def getModelRoomBelow(self):
+        return self.getRoomInModel(self.x+1, self.y)
+
+
+    def getModelRoomRight(self):
+        return self.getRoomInModel(self.x, self.y+1)
+
+
+    def getModelRoomLeft(self):
+        return self.getRoomInModel(self.x, self.y-1)
+
+
+    def runModelCheck(self):
+        for i in range(0, 20):
+            for j in range(0, 20):
+                current_room = self.model[i][j]
+                above = self.getModelRoomAbove()
+                below = self.getModelRoomBelow()
+                right = self.getModelRoomRight()
+                left = self.getModelRoomLeft()
+
+                if current_room['Noise'] == True:
+                    if above != None:
+                        above['Potential_Agnet'] = True
+                    if below != None:
+                        below['Potential_Agent'] = True
+                    if right != None:
+                        right['Potential_Agent'] = True
+                    if left != None:
+                        left['Potential_Agent'] = True
+
                 stench_count = 0
                 breeze_count = 0
-                if (x-1) >= 0:
-                    above = self.model[x-1][y]
-                    if above['Stench'] == True:
-                        stench_count = stench_count + 1
-                    if above['Breeze'] == True:
-                        breeze_count = breeze_count + 1
-                if (x+1) < 20:
-                    below = self.model[x+1][y]
-                    if below['Stench'] == True:
-                        stench_count = stench_count + 1
-                    if below['Breeze'] == True:
-                        breeze_count = breeze_count + 1
-                if (y-1) >= 0:
-                    left = self.model[x][y-1]
-                    if left['Stench'] == True:
-                        stench_count = stench_count + 1
-                    if left['Breeze'] == True:
-                        breeze_count = breeze_count + 1
-                if (y+1) < 20:
-                    right = self.model[x][y+1]
-                    if right['Stench'] == True:
-                        stench_count = stench_count + 1
-                    if right['Breeze'] == True:
-                        breeze_count = breeze_count + 1
-                rm['Stench_Adjacent'] = stench_count
-                rm['Breeze_Adjacent'] = breeze_count
-                if stench_count >= 3:
-                    rm['Wumpus'] = True
-                if breeze_count >= 3:
-                    rm['Pit'] = True
+                if above != None and above['Stench'] == True:
+                    stench_count = stench_count + 1
+                if above != None and above['Breeze'] == True:
+                    breeze_count = breeze_count + 1
+                if below != None and below['Stench'] == True:
+                    stench_count = stench_count + 1
+                if below != None and below['Breeze'] == True:
+                    breeze_count = breeze_count + 1
+                if right != None and right['Stench'] == True:
+                    stench_count = stench_count + 1
+                if right != None and right['Breeze'] == True:
+                    breeze_count = breeze_count + 1
+                if left != None and left['Stench'] == True:
+                    stench_count = stench_count + 1
+                if left != None and left['Breeze'] == True:
+                    breeze_count = breeze_count + 1
+
+                current_room['Breeeze_Adjacent'] = breeze_count
+                current_room['Stench_Adjacent'] = stench_count
 
 
-    # Need to incorporate logic of when to shoot arrow and once have treasure making way back
-    def moveDecisionTwo(self):
-        if self.hasGold == True:
-            if self.return_mode == False:
-                self.return_mode = True
-                self.movesMade.reverse()
-        if self.return_mode == True:
-            if self.return_rotations < 2:
-                self.return_rotations = self.return_rotations + 1
-                return 'right'
-            else:
-                if len(self.movesMade) > 0:
-                    moveToReverse = self.movesMade.pop()
-                    if moveToReverse == 0:  # Undoing a Forward
-                        return 'forward'
-                    elif moveToReverse == 1: # Undoing a Right
-                        return 'left'
-                    elif moveToReverse == 2: # Undoing a Left
-                        return 'right'
-        else:
-            current_room = self.model[self.x][self.y]
-            current_room['Breeze'] = self.senses[0]
-            current_room['Stench'] = self.senses[1]
-            current_room['Visited'] = True
-            self.updateModel()
-            safe_moves = [0, 0, 0, 0]   # Up, Down, Left, Right
-                # 0 means unknown, 1 means unsafe, 2 means possibly unsafe, 3 means visited
-            # Check if moving forward is a new room / safe assumption - else check room to left then right then below - if none are safe - either shoot arrow or make random choice
-            above, below, right, left = None, None, None, None
-            if self.x >= 1:
-                above = self.model[self.x-1][self.y]
-            if self.x < 19:
-                below = self.model[self.x+1][self.y]
-            if self.y >= 1:
-                left = self.model[self.x][self.y-1]
-            if self.y < 19:
-                right = self.model[self.x][self.y+1]
-            if above != None:
-                if above['Wumpus'] == True or above['Pit'] == True:
-                    safe_moves[0] = 1
-                elif above['Breeze_Adjacent'] > 0 or above['Stench_Adjacent'] > 0:
-                    safe_moves[0] = 2
-            if below != None:
-                if below['Wumpus'] == True or below['Pit'] == True:
-                    safe_moves[1] = 1
-                elif below['Breeze_Adjacent'] > 0 or below['Stench_Adjacent'] > 0:
-                    safe_moves[1] = 2
-            if left != None:
-                if left['Wumpus'] == True or left['Pit'] == True:
-                    safe_moves[2] = 1
-                elif left['Breeze_Adjacent'] > 0 or left['Stench_Adjacent'] > 0:
-                    safe_moves[2] = 2
-            if right != None:
-                if right['Wumpus'] == True or right['Pit'] == True:
-                    safe_moves[3] = 1
-                elif right['Breeze_Adjacent'] > 0 or right['Stench_Adjacent'] > 0:
-                    safe_moves[3] = 2
-            num_safe_moves = 0
-            for entry in safe_moves:
-                if entry == 0:
-                    num_safe_moves = num_safe_moves + 1
-            if num_safe_moves == 1: # Only one option - Take it whether visited or not
-                move_index = safe_moves.index(0)
-                if move_index == 0: # Want direction to be UP
-                    if self.direction == UP: # Move Forward
-                        self.movesMade.append(0)
-                        return 'forward'
-                    elif self.direction == RIGHT: # Want to turn Left
-                        self.movesMade.append(2)
-                        return 'left'
-                    elif self.direction == LEFT: # Want to turn right
-                        self.movesMade.append(1)
-                        return 'right'
-                    elif self.direction == DOWN: # Need to make two turns
-                        self.movesMade.append(1)
-                        return 'right'
-                elif move_index == 1: # Want direction to be DOWN
-                    if self.direction == DOWN: # Move Forward
-                        self.movesMade.append(0)
-                        return 'forward'
-                    elif self.direction == RIGHT: # Turn Right
-                        self.movesMade.append(1)
-                        return 'right'
-                    elif self.direction == LEFT: # Turn Left
-                        self.movesMade.append(2)
-                        return 'left'
-                    elif self.direction == UP: # Need to make two turns
-                        self.movesMade.append(1)
-                        return 'right'
-                elif move_index == 2:   # Want direction to be LEFT
-                    if self.direction == LEFT: # Move Forward
-                        self.movesMade.append(0)
-                        return 'forward'
-                    elif self.direction == RIGHT: # Need to make two turns
-                        self.movesMade.append(2)
-                        return 'left'
-                    elif self.direction == UP: # Need to turn left
-                        self.movesMade.append(2)
-                        return 'left'
-                    elif self.direction == DOWN: # Need to turn right
-                        self.movesMade.append(1)
-                        return 'right'
-                elif move_index == 3:   # Want direction to be RIGHT
-                    if self.direction == RIGHT: # Move Forward
-                        self.movesMade.append(0)
-                        return 'forward'
-                    elif self.direction == UP: # Turn right
-                        self.movesMade.append(1)
-                        return 'right'
-                    elif self.direction == DOWN: # Turn left
-                        self.movesMade.append(2)
-                        return 'left'
-                    elif self.direction == LEFT: # Need to make two turns
-                        self.movesMade.append(1)
-                        return 'right'
-            elif num_safe_moves > 1:  # Find a safe move not visited yet
-                if above != None and safe_moves[0] == 0:
-                    if above['Visited'] == True:
-                        safe_moves[0] = 3
-                if below != None and safe_moves[1] == 0:
-                    if below['Visited'] == True:
-                        safe_moves[1] = 3
-                if left != None and safe_moves[2] == 0:
-                    if left['Visited'] == True:
-                        safe_moves[2] = 3
-                if right != None and safe_moves[3] == 0:
-                    if right['Visited'] == True:
-                        safe_moves[3] = 3
-            elif num_safe_moves == 0:   # No Safe moves, go forward if possible, else random direction
-                if self.direction == UP and above != None:
-                    self.movesMade.append(0)
-                    return 'forward'
-                elif self.direction == DOWN and below != None:
-                    self.movesMade.append(0)
-                    return 'forward'
-                elif self.direction == LEFT and left != None:
-                    self.movesMade.append(0)
-                    return 'forward'
-                elif self.direction == RIGHT and right != None:
-                    self.movesMade.append(0)
-                    return 'forward'
-                self.movesMade.append(1)
-                return 'right'
-            num_safe_moves = 0
-            for entry in safe_moves:
-                if entry == 0:
-                    num_safe_moves = num_safe_moves + 1
-            if num_safe_moves == 1:
-                move_index = safe_moves.index(0)
-                if move_index == 0:  # Want direction to be UP
-                    if self.direction == UP:  # Move Forward
-                        self.movesMade.append(0)
-                        return 'forward'
-                    elif self.direction == RIGHT:  # Want to turn Left
-                        self.movesMade.append(2)
-                        return 'left'
-                    elif self.direction == LEFT:  # Want to turn right
-                        self.movesMade.append(1)
-                        return 'right'
-                    elif self.direction == DOWN:  # Need to make two turns
-                        self.movesMade.append(1)
-                        return 'right'
-                elif move_index == 1:  # Want direction to be DOWN
-                    if self.direction == DOWN:  # Move Forward
-                        self.movesMade.append(0)
-                        return 'forward'
-                    elif self.direction == RIGHT:  # Turn Right
-                        self.movesMade.append(1)
-                        return 'right'
-                    elif self.direction == LEFT:  # Turn Left
-                        self.movesMade.append(2)
-                        return 'left'
-                    elif self.direction == UP:  # Need to make two turns
-                        self.movesMade.append(1)
-                        return 'right'
-                elif move_index == 2:  # Want direction to be LEFT
-                    if self.direction == LEFT:  # Move Forward
-                        self.movesMade.append(0)
-                        return 'forward'
-                    elif self.direction == RIGHT:  # Need to make two turns
-                        self.movesMade.append(2)
-                        return 'left'
-                    elif self.direction == UP:  # Need to turn left
-                        self.movesMade.append(2)
-                        return 'left'
-                    elif self.direction == DOWN:  # Need to turn right
-                        self.movesMade.append(1)
-                        return 'right'
-                elif move_index == 3:  # Want direction to be RIGHT
-                    if self.direction == RIGHT:  # Move Forward
-                        self.movesMade.append(0)
-                        return 'forward'
-                    elif self.direction == UP:  # Turn right
-                        self.movesMade.append(1)
-                        return 'right'
-                    elif self.direction == DOWN:  # Turn left
-                        self.movesMade.append(1)
-                        return 'left'
-                    elif self.direction == LEFT:  # Need to make two turns
-                        self.movesMade.append(1)
-                        return 'right'
-            elif num_safe_moves > 1:    # go forward if safe, else pick least directio moves needed direction to move
-                if self.direction == UP and safe_moves[0] == 0:
-                    self.movesMade.append(0)
-                    return 'forward'
-                elif self.direction == DOWN and safe_moves[1] == 0:
-                    self.movesMade.append(0)
-                    return 'forward'
-                elif self.direction == LEFT and safe_moves[2] == 0:
-                    self.movesMade.append(0)
-                    return 'forward'
-                elif self.direction == RIGHT and safe_moves[3] == 0:
-                    self.movesMade.append(0)
-                    return 'forward'
-                elif self.direction == UP:
-                    if safe_moves[2] == 0:
-                        self.movesMade.append(2)
-                        return 'left'
-                    else:
-                        self.movesMade.append(1)
-                        return 'right'
-                elif self.direction == DOWN:
-                    if safe_moves[2] == 0:
-                        self.movesMade.append(1)
-                        return 'right'
-                    else:
-                        self.movesMade.append(2)
-                        return 'left'
-                elif self.direction == LEFT:
-                    if safe_moves[0] == 0:
-                        self.movesMade.append(1)
-                        return 'right'
-                    else:
-                        self.movesMade.append(2)
-                        return 'left'
-                elif self.direction == RIGHT:
-                    if safe_moves[0] == 0:
-                        self.movesMade.append(2)
-                        return 'left'
-                    else:
-                        self.movesMade.append(1)
-                        return 'right'
-            elif num_safe_moves == 0:   # No Safe moves, select a random visited location/direction
-                if self.direction == UP and safe_moves[0] == 3:
-                    self.movesMade.append(0)
-                    return 'forward'
-                elif self.direction == DOWN and safe_moves[1] == 3:
-                    self.movesMade.append(0)
-                    return 'forward'
-                elif self.direction == LEFT and safe_moves[2] == 3:
-                    self.movesMade.append(0)
-                    return 'forward'
-                elif self.direction == RIGHT and safe_moves[3] == 3:
-                    self.movesMade.append(0)
-                    return 'forward'
-                else:
-                    self.movesMade.append(1)
-                    return 'right'
+    def updateModelStyleOne(self):
+        current_room = self.model[self.x][self.y]
+        current_room['Stench'] = self.senses[1]
+        current_room['Breeze'] = self.senses[0]
+        current_room['Noise'] = self.senses[2]
+        self.runModelCheck()
+
+
+    def moveDecisionOne(self):
+        self.clearNoiseFlagsFromModel()
+        self.updateModelStyleOne()
+
 
 
     def makeMove(self, move):
