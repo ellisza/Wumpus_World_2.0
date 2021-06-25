@@ -487,7 +487,7 @@ class Agent:
             temp = []
             for j in range(0, 20):
                 temp2 = {'Breeze': False, 'Stench': False, 'Wumpus': False, 'Pit': False, 'Noise': False, 'Visited': False, 'Potential_Agent': True,
-                         'Breeze_Adjacent': 0, 'Stench_Adjacent': 0}
+                         'Breeze_Adjacent': 0, 'Stench_Adjacent': 0, 'X': i, 'Y': j}
                 temp.append(temp2)
             self.model.append(temp)
         self.movesMade = []
@@ -503,7 +503,7 @@ class Agent:
         if self.direction == UP:
             return "forward"
 
-
+    # Helper Function - Removes all Noise Flags in all rooms in self.model, along with setting Potential_Agent to False in all rooms in self.model
     def clearNoiseFlagsFromModel(self):
         for i in range(0, 20):
             for j in range(0, 20):
@@ -511,28 +511,28 @@ class Agent:
                 rm['Noise'] = False
                 rm['Potential_Agnet'] = False
 
-
+    # Helper Function - Returns the room object in self.model at desiredX,desiredY location - returns None if it went out of bounds
     def getRoomInModel(self, desiredX, desiredY):
         if desiredX >= 0 and desiredY >= 0 and desiredX < 20 and desiredY < 20:
             return self.model[desiredX][desiredY]
 
-
+    # Helper Function - Returns the room object in self.model that is above the agents current room - returns None if it went out of bounds
     def getModelRoomAbove(self):
         return self.getRoomInModel(self.x-1, self.y)
 
-
+    # Helper Function - Returns the room object in the self.model that is below the agents current room - returns None if it went out of bounds
     def getModelRoomBelow(self):
         return self.getRoomInModel(self.x+1, self.y)
 
-
+    # Helper Function - Returns the room object in the self.model that is to the right of the agents current room - returns None if it went out of bounds
     def getModelRoomRight(self):
         return self.getRoomInModel(self.x, self.y+1)
 
-
+    # Helper Function - Returns the room object in the self.model that is to the left of the agents current room - Returns None if it wen tout of bounds
     def getModelRoomLeft(self):
         return self.getRoomInModel(self.x, self.y-1)
 
-
+    # Helper Function - Loops through each room object in the self.model and updates the Breeze_Adjacent and Stench_Adjacent counts, Also updates the Potential_Agent 
     def runModelCheck(self):
         for i in range(0, 20):
             for j in range(0, 20):
@@ -544,7 +544,7 @@ class Agent:
 
                 if current_room['Noise'] == True:
                     if above != None:
-                        above['Potential_Agnet'] = True
+                        above['Potential Agent'] = True
                     if below != None:
                         below['Potential_Agent'] = True
                     if right != None:
@@ -574,21 +574,169 @@ class Agent:
                 current_room['Breeeze_Adjacent'] = breeze_count
                 current_room['Stench_Adjacent'] = stench_count
 
-
-    def updateModelStyleOne(self):
+    # Helper Function - updates the self.model based on the new information obtained in our newly arrived room (based on self.senses) - calls self.runModelCheck() at end
+    def updateModel(self):
         current_room = self.model[self.x][self.y]
+        current_room['Visited'] = True
         current_room['Stench'] = self.senses[1]
         current_room['Breeze'] = self.senses[0]
         current_room['Noise'] = self.senses[2]
         self.runModelCheck()
 
 
+    # Helper Function - Returns the room object in self.model of the room ahead of us (based on our direction) if it's a valid move, if it's an out of bounds move it'll return None
+    def canMoveFoward(self):
+        if self.direction == UP:
+            if self.x > 0:
+                return self.getModelRoomAbove()
+        elif self.direction == DOWN:
+            if self.x < 19:
+                return self.getModelRoomBelow()
+        elif self.direction == LEFT:
+            if self.y > 0:
+                return self.getModelRoomLeft()
+        elif self.direction == RIGHT:
+            if self.y < 19:
+                return self.getModelRoomRight()
+        return None
+
+
+    # HELPER FUNCTION SPECIFIC TO WASECAS AGENT LOGIC
+    def getRoomRating(self, roomObject):
+        if roomObject['Wumpus'] == True:
+            return 7
+        if roomObject['Pit'] == True:
+            return 6
+        if roomObject['Potential_Agent'] == True:
+            if roomObject['Visited'] == True:
+                return 4
+            else:
+                return 5
+        if roomObject['Breeze'] == True or roomObject['Stench'] == True:
+            if roomObject['Visited'] == True:
+                return 0
+            else:
+                return 1
+
+    # HELPER FUNCTION SPECIFIC TO WASECAS AGENT LOGIC
+    def getNeighborSafetyRatings(self):
+        # 0 - Nothing is Known / Room has been visited
+        # 1 - Nothing is Known / Room has not been visited
+        # 2 - Room has Breeze or Stench / Room has been Visited
+        # 3 - Room has Breeze or Stench / Room has not been Visisted
+        # 4 - Room has Potential Agent / Room has been Visisted
+        # 5 - Room has Potential Agent / Room has not been Visisted
+        # 6 - Room has Pit
+        # 7 - Room has Wumpus
+        current_room = self.getRoomInModel(self.x, self.y)
+        above = self.getModelRoomAbove()
+        below = self.getModelRoomBelow()
+        right = self.getModelRoomRight()
+        left = self.getModelRoomLeft()
+
+        results = [None, None, None, None]
+        if above != None:
+            results[1] = self.getRoomRating(above)
+        if below != None:
+            results[3] = self.getRoomRating(below)
+        if left != None:
+            results[0] = self.getRoomRating(left)
+        if right != None:
+            results[2] = self.getRoomRating(right)
+        return results
+
+
+    # HELPER FUNCTION SPECIFIC TO WASECAS AGENT LOGIC
+    def determineNecessaryMove(self, dir):
+        if dir == 0: # Want to head in Left Direction
+            if self.direction == LEFT:
+                return 'forward'
+        elif dir == 1: # Want to head in Above Direction
+            if self.direction == UP:
+                return 'forward'
+        elif dir == 2: # Want to head in Right Direction
+            if self.direction == RIGHT:
+                return 'forward'
+        elif dir == 3: # Want to head in Below Direction
+            if self.direction == DOWN:
+                return 'forward'
+        if ((self.direction == DOWN and dir == 1) or (self.direction == UP and dir == 3) or (self.direction == LEFT and dir == 2) or (self.direction == RIGHT and dir == 0)):
+            return 'right'
+        elif self.direction == UP and dir == 0:
+            return 'left'
+        elif self.direction == DOWN and dir == 2:
+            return 'left'
+        elif self.direction == RIGHT and dir == 1:
+            return 'left'
+        elif self.direction == LEFT and dir == 3:
+            return 'left'
+        else:
+            return 'right'
+
+    # HELPER FUNCTION SPECIFIC TO WASECAS AGENT LOGIC
+    def regularMove(self):
+        neighbor_ratings = self.getNeighborSafetyRatings()
+        dir = None
+        if 1 in neighbor_ratings:
+            dir = neighbor_ratings.index(1)
+        elif 3 in neighbor_ratings:
+            dir = neighbor_ratings.index(3)
+        elif 0 in neighbor_ratings:
+            dir = neighbor_ratings.index(0)
+        elif 2 in neighbor_ratings:
+            dir = neighbor_ratings.index(2)
+        else:
+            dir_to_shoot_in = None
+            if 4 in neighbor_ratings:
+                dir_to_shoot_in = neighbor_ratings.index(4)
+            elif 5 in neighbor_ratings:
+                dir_to_shoot_in = neighbor_ratings.index(5)
+            elif 7 in neighbor_ratings:
+                dir_to_shoot_in = neighbor_ratings.index(7)
+            else:
+                # Nothing else in neighbor_ratings except a pit
+                for i in range(0, 4):
+                    if neighbor_ratings[i] != None and neighbor_ratings[i] != 6:
+                        dir = i
+                        break
+            if dir_to_shoot_in != None:
+        # CALL TO SHOOT ARROW IN dir DIRECTION ############
+        ##########################################
+        return self.determineNecessaryMove(dir)
+
+    # HELPER FUNCTION SPECIFIC TO WASECAS AGENT LOGIC
+    def returningToStart(self):
+        if self.return_rotations < 2:
+            self.return_rotations = self.return_rotations + 1
+            return 'right'
+        else:
+            move_to_reverse = self.movesMade.pop()
+            if move_to_reverse == 0:    # Reverse a Forward Action
+                return 'forward'
+            elif move_to_reverse == 1:  # Reverse a Right Rotation
+                return 'left'
+            elif move_to_reverse == 2:  # Reverse a Left Rotation
+                return 'right'
+
+    # FUNCTION SPECIFIC TO WASECAS AGENT LOGIC
     def moveDecisionOne(self):
         self.clearNoiseFlagsFromModel()
-        self.updateModelStyleOne()
-
-
-
+        self.StyleOne()
+        if self.hasGold == True:
+            if self.return_mode == False:
+                self.return_mode = True
+                self.movesMade.reverse()
+            return self.returningToStart()
+        else:
+            result = self.regularMove()
+            if result == 'forward':
+                self.movesMade.append(0)
+            elif result == 'right':
+                self.movesMade.append(1)
+            elif result == 'left':
+                self.movesMade.append(2)
+            return result            
+        
     def makeMove(self, move):
         if move == "forward":
             pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_UP))
